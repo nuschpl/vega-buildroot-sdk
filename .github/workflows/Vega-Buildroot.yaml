@@ -4,6 +4,9 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -106,3 +109,22 @@ jobs:
         tail -200 ${{ github.workspace }}/build.log >> $GITHUB_STEP_SUMMARY
         echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
+    - name: Generate unique tag
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: generate_tag
+        run: |
+          # Create a tag name like "build-20251027-abc1234"
+          echo "TAG_NAME=build-$(date +'%Y%m%d')-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          
+    - name: Create GitHub Release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ${{ env.TAG_NAME }} \
+            ./output/images/freeloader.bin \
+            ./output/images/kernel.bin \
+            ./output/images/ubifs.img \
+            --title "Build ${{ env.TAG_NAME }}" \
+            --notes "Automated build from commit ${{ github.sha }}."
+
