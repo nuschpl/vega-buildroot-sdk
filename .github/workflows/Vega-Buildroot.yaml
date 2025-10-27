@@ -122,9 +122,9 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       run: |
         gh release create ${{ env.TAG_NAME }} \
-          ./output/images/freeloader.bin \
-          ./output/images/kernel.bin \
-          ./output/images/ubifs.img \
+          ./out/freeloader.bin \
+          ./out/kernel.bin \
+          ./out/ubifs.img \
           --title "Build ${{ env.TAG_NAME }}" \
           --notes "Automated build from commit ${{ github.sha }}."
 
